@@ -20,6 +20,18 @@ import (
 
 var opts Opts
 
+// Define a custom flag type for string slices
+type stringSliceFlag []string
+
+func (s *stringSliceFlag) String() string {
+	return strings.Join(*s, ",")
+}
+
+func (s *stringSliceFlag) Set(value string) error {
+	*s = append(*s, value)
+	return nil
+}
+
 func main() {
 	if err := run(os.Args); err != nil {
 		if err != flag.ErrHelp {
@@ -33,7 +45,8 @@ func run(args []string) error {
 	// flags
 	testFlags := flag.NewFlagSet("testman test", flag.ExitOnError)
 	testFlags.BoolVar(&opts.Verbose, "v", false, "verbose")
-	testFlags.StringVar(&opts.Run, "run", "^(Test|Example)", "regex to filter out tests and examples")
+
+	testFlags.Var((*stringSliceFlag)(&opts.Skip), "skip", "regex to skip tests and examples (can be specified multiple times)")
 	testFlags.IntVar(&opts.Retry, "retry", 0, "fail after N retries")
 	testFlags.DurationVar(&opts.Timeout, "timeout", 0, "program max duration")
 	testFlags.BoolVar(&opts.ContinueOnError, "continue-on-error", false, "continue on error (but still fails at the end)")
@@ -41,9 +54,10 @@ func run(args []string) error {
 	testFlags.IntVar(&opts.TestCount, "test.count", 1, "`go test -count=VAL`")
 	testFlags.BoolVar(&opts.TestV, "test.v", false, "`go test -v`")
 	testFlags.BoolVar(&opts.TestRace, "test.race", false, "`go test -race`")
+
 	listFlags := flag.NewFlagSet("testman list", flag.ExitOnError)
 	listFlags.BoolVar(&opts.Verbose, "v", false, "verbose")
-	listFlags.StringVar(&opts.Run, "run", "^(Test|Example)", "regex to filter out tests and examples")
+	listFlags.Var((*stringSliceFlag)(&opts.Skip), "skip", "regex to skip tests and examples (can be specified multiple times)")
 
 	root := &ffcli.Command{
 		ShortUsage: "testman <subcommand> [flags]",
@@ -78,13 +92,13 @@ const (
 	testLongHelp = `EXAMPLES
    testman test ./...
    testman test -v ./...
-   testman test -run ^TestUnstable -timeout=300s -retry=50 ./...
-   testman test -run ^TestBroken -test.timeout=30s -retry=10 --continue-on-error ./...
+   testman test -skip ^TestUnstable -timeout=300s -retry=50 ./...
+   testman test -skip ^TestBroken -test.timeout=30s -retry=10 --continue-on-error ./...
    testman test -test.timeout=10s -test.v -test.count=2 -test.race`
 	listLongHelp = `EXAMPLES
    testman list ./...
    testman list -v ./...
-   testman list -run ^TestStable ./...`
+   testman list -skip ^TestStable ./...`
 )
 
 func runList(ctx context.Context, args []string) error {
@@ -169,7 +183,6 @@ func runTest(ctx context.Context, args []string) error {
 
 		isPackageOK := true
 		for _, test := range tests {
-			// FIXME: check if matches run regex
 			args := []string{
 				fmt.Sprintf("-test.count=%d", opts.TestCount),
 			}
@@ -275,16 +288,31 @@ func listDirTests(dir string) ([]string, error) {
 		if strings.HasPrefix(line, "ok ") {
 			continue
 		}
-		if opts.Run != "" {
-			matched, err := regexp.MatchString(opts.Run, line)
-			if err != nil {
-				return nil, err
+
+	
+		tests = append(tests, line)
+	}
+
+	if len(opts.Skip) > 0 {
+		log.Println("skip", opts.Skip)
+		var filteredTests []string
+		for _, test := range tests {
+			shouldKeep := true
+			for _, skip := range opts.Skip {
+				matched, err := regexp.MatchString(skip, test)
+				if err != nil {
+					return nil, err
+				}
+				if matched {
+					shouldKeep = false
+					break
+				}
 			}
-			if !matched {
-				continue
+			if shouldKeep {
+				filteredTests = append(filteredTests, test)
 			}
 		}
-		tests = append(tests, line)
+		tests = filteredTests
 	}
 	return tests, nil
 }
@@ -320,7 +348,7 @@ type Package struct {
 
 type Opts struct {
 	Verbose         bool
-	Run             string
+	Skip            stringSliceFlag
 	Timeout         time.Duration
 	Retry           int
 	TmpDir          string
