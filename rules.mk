@@ -101,7 +101,7 @@ INSTALL_STEPS += go.install
 .PHONY: go.release
 go.release:
 	$(call check-program, goreleaser)
-	goreleaser --snapshot --skip-publish --rm-dist
+	goreleaser --snapshot --skip=publish --rm-dist
 	@echo -n "Do you want to release? [y/N] " && read ans && \
 	  if [ $${ans:-N} = y ]; then set -xe; goreleaser --rm-dist; fi
 RELEASE_STEPS += go.release
