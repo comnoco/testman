@@ -136,7 +136,7 @@ func runList(ctx context.Context, args []string) error {
 			continue
 		}
 
-		fmt.Println(pkg.ImportPath)
+		log.Println(pkg.ImportPath)
 		for _, test := range tests {
 			fmt.Printf("  %s\n", test)
 		}
@@ -161,7 +161,7 @@ func runTest(ctx context.Context, args []string) error {
 	if opts.Timeout > 0 {
 		go func() {
 			<-time.After(opts.Timeout)
-			fmt.Printf("FAIL: timed out after %s\n", time.Since(start))
+			log.Printf("FAIL: timed out after %s\n", time.Since(start))
 			panic(fmt.Sprintf("timed out after %s", time.Since(start)))
 		}()
 	}
@@ -187,7 +187,7 @@ func runTest(ctx context.Context, args []string) error {
 		// compile test binary
 		bin, err := compileTestBin(pkg, opts.TmpDir)
 		if err != nil {
-			fmt.Printf("FAIL\t%s\t[compile error: %v]\n", pkg.ImportPath, err)
+			log.Printf("FAIL\t%s\t[compile error: %v]\n", pkg.ImportPath, err)
 			return err
 		}
 
@@ -213,23 +213,23 @@ func runTest(ctx context.Context, args []string) error {
 				out, err := cmd.CombinedOutput()
 				if err != nil {
 					if i == 0 {
-						fmt.Printf("FAIL\t%s.%s\t[test error: %v]\n", pkg.ImportPath, test, err)
+						log.Printf("FAIL\t%s.%s\t[test error: %v]\n", pkg.ImportPath, test, err)
 						isPackageOK = false
 						atLeastOneFailure = true
 					} else if opts.Verbose {
-						fmt.Printf("RETRY\t%s.%s\t[test error: %v]\n", pkg.ImportPath, test, err)
+						log.Printf("RETRY\t%s.%s\t[test error: %v]\n", pkg.ImportPath, test, err)
 					}
 					if opts.Verbose {
-						fmt.Println(string(out))
+						log.Println(string(out))
 					}
 				} else {
-					fmt.Printf("ok\t%s.%s\n", pkg.ImportPath, test)
+					log.Printf("ok\t%s.%s\n", pkg.ImportPath, test)
 					break
 				}
 			}
 		}
 		if isPackageOK {
-			fmt.Printf("ok\t%s\t%s\n", pkg.ImportPath, time.Since(pkgStart))
+			log.Printf("ok\t%s\t%s\n", pkg.ImportPath, time.Since(pkgStart))
 		}
 	}
 
