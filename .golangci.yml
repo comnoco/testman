@@ -16,6 +16,13 @@ linters-settings:
     min-occurrences: 4
   misspell:
     locale: US
+  depguard:
+    rules:
+      main:
+        list-mode: lax
+        allow:
+          - $gostd
+          - "github.com/peterbourgon/ff/v3/ffcli"
 
 linters:
   disable-all: true

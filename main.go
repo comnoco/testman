@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -14,8 +15,6 @@ import (
 	"time"
 
 	"github.com/peterbourgon/ff/v3/ffcli"
-	"moul.io/motd"
-	"moul.io/u"
 )
 
 var opts Opts
@@ -37,7 +36,7 @@ func main() {
 		if err != flag.ErrHelp {
 			log.Fatalf("error: %v", err)
 		}
-		os.Exit(1)
+		// os.Exit(1)
 	}
 }
 
@@ -45,8 +44,8 @@ func run(args []string) error {
 	// flags
 	testFlags := flag.NewFlagSet("testman test", flag.ExitOnError)
 	testFlags.BoolVar(&opts.Verbose, "v", false, "verbose")
-
-	testFlags.Var((*stringSliceFlag)(&opts.Skip), "skip", "regex to skip tests and examples (can be specified multiple times)")
+	testFlags.Var(&opts.Run, "run", "regex to run tests and examples (can be specified multiple times)")
+	testFlags.Var(&opts.Skip, "skip", "regex to skip tests and examples (can be specified multiple times)")
 	testFlags.IntVar(&opts.Retry, "retry", 0, "fail after N retries")
 	testFlags.DurationVar(&opts.Timeout, "timeout", 0, "program max duration")
 	testFlags.BoolVar(&opts.ContinueOnError, "continue-on-error", false, "continue on error (but still fails at the end)")
@@ -54,16 +53,18 @@ func run(args []string) error {
 	testFlags.IntVar(&opts.TestCount, "test.count", 1, "`go test -count=VAL`")
 	testFlags.BoolVar(&opts.TestV, "test.v", false, "`go test -v`")
 	testFlags.BoolVar(&opts.TestRace, "test.race", false, "`go test -race`")
+	testFlags.BoolVar(&opts.RegexCaseInsensitive, "i", false, "case insensitive regex matching")
 
 	listFlags := flag.NewFlagSet("testman list", flag.ExitOnError)
 	listFlags.BoolVar(&opts.Verbose, "v", false, "verbose")
-	listFlags.Var((*stringSliceFlag)(&opts.Skip), "skip", "regex to skip tests and examples (can be specified multiple times)")
+	listFlags.Var(&opts.Skip, "skip", "regex to skip tests and examples (can be specified multiple times)")
+	listFlags.Var(&opts.Run, "run", "regex to run tests and examples (can be specified multiple times)")
+	listFlags.BoolVar(&opts.RegexCaseInsensitive, "i", false, "case insensitive regex matching")
 
 	root := &ffcli.Command{
 		ShortUsage: "testman <subcommand> [flags]",
 		ShortHelp:  "Advanced testing workflows for Go projects.",
 		Exec: func(ctx context.Context, args []string) error {
-			fmt.Println(motd.Default())
 			return flag.ErrHelp
 		},
 		Subcommands: []*ffcli.Command{
@@ -94,11 +95,17 @@ const (
    testman test -v ./...
    testman test -skip ^TestUnstable -timeout=300s -retry=50 ./...
    testman test -skip ^TestBroken -test.timeout=30s -retry=10 --continue-on-error ./...
+	 testman test -skip slow -run stable -i ./...
+	 testman test -run ^TestUnstable -timeout=300s -retry=50 ./...
+   testman test -run ^TestBroken -test.timeout=30s -retry=10 --continue-on-error ./...
    testman test -test.timeout=10s -test.v -test.count=2 -test.race`
 	listLongHelp = `EXAMPLES
    testman list ./...
    testman list -v ./...
-   testman list -skip ^TestStable ./...`
+   testman list -skip ^TestStable ./...
+	 testman list -run stable -i ./...
+	 testman list -run ^TestStable ./...`
+
 )
 
 func runList(ctx context.Context, args []string) error {
@@ -145,14 +152,14 @@ func runTest(ctx context.Context, args []string) error {
 	}
 	defer cleanup()
 
-	log.Printf("runTest opts=%s args=%s", u.JSON(opts), u.JSON(args))
+	log.Printf("runTest opts=%s args=%s", JSON(opts), JSON(args))
 	start := time.Now()
 
 	if opts.Timeout > 0 {
 		go func() {
 			<-time.After(opts.Timeout)
 			fmt.Printf("FAIL: timed out after %s\n", time.Since(start))
-			os.Exit(1)
+			panic(fmt.Sprintf("timed out after %s", time.Since(start)))
 		}()
 	}
 
@@ -225,19 +232,19 @@ func runTest(ctx context.Context, args []string) error {
 
 	log.Printf("total: %s\n", time.Since(start))
 	if atLeastOneFailure {
-		os.Exit(1)
+		return errors.New("at least one failure occurred")
 	}
 	return nil
 }
 
 func preRun() (func(), error) {
 	if !opts.Verbose {
-		log.SetOutput(ioutil.Discard)
+		log.SetOutput(io.Discard)
 	}
 
 	// create temp dir
 	var err error
-	opts.TmpDir, err = ioutil.TempDir("", "testman")
+	opts.TmpDir, err = os.MkdirTemp("", "testman")
 	if err != nil {
 		return nil, err
 	}
@@ -249,7 +256,7 @@ func preRun() (func(), error) {
 }
 
 func compileTestBin(pkg Package, tempdir string) (string, error) {
-	name := strings.Replace(pkg.ImportPath, "/", "~", -1)
+	name := strings.ReplaceAll(pkg.ImportPath, "/", "~")
 	bin := filepath.Join(tempdir, name)
 	args := []string{"test", "-c"}
 	if opts.TestV {
@@ -289,7 +296,6 @@ func listDirTests(dir string) ([]string, error) {
 			continue
 		}
 
-	
 		tests = append(tests, line)
 	}
 
@@ -299,6 +305,10 @@ func listDirTests(dir string) ([]string, error) {
 		for _, test := range tests {
 			shouldKeep := true
 			for _, skip := range opts.Skip {
+				if opts.RegexCaseInsensitive {
+					skip = "(?i)" + skip
+				}
+				
 				matched, err := regexp.MatchString(skip, test)
 				if err != nil {
 					return nil, err
@@ -314,6 +324,33 @@ func listDirTests(dir string) ([]string, error) {
 		}
 		tests = filteredTests
 	}
+
+	if len(opts.Run) > 0 {
+		log.Println("run", opts.Run)
+		var filteredTests []string
+		for _, test := range tests {
+			shouldKeep := false
+			for _, run := range opts.Run {
+				if opts.RegexCaseInsensitive {
+					run = "(?i)" + run
+				}
+
+				matched, err := regexp.MatchString(run, test)
+				if err != nil {
+					return nil, err
+				}
+				if matched {
+					shouldKeep = true
+					break
+				}
+			}
+			if shouldKeep {
+				filteredTests = append(filteredTests, test)
+			}
+		}
+		tests = filteredTests
+	}
+
 	return tests, nil
 }
 
@@ -349,10 +386,12 @@ type Package struct {
 type Opts struct {
 	Verbose         bool
 	Skip            stringSliceFlag
+	Run             stringSliceFlag
 	Timeout         time.Duration
 	Retry           int
 	TmpDir          string
 	ContinueOnError bool
+	RegexCaseInsensitive bool
 
 	// test.*
 	TestTimeout time.Duration

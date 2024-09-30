@@ -7,11 +7,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"go.uber.org/goleak"
-	"moul.io/u"
 )
 
 func TestRun(t *testing.T) {
-	closer := u.MustCaptureStdoutAndStderr()
+	closer := MustCaptureStdoutAndStderr()
 	err := run([]string{"testman"})
 	require.Equal(t, err, flag.ErrHelp)
 	_ = closer()
