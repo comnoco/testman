@@ -1,7 +1,7 @@
 run:
   deadline: 1m
   tests: false
-  skip-files:
+  exclude-files:
     - "testing.go"
     - ".*\\.pb\\.go"
     - ".*\\.gen\\.go"
@@ -28,35 +28,26 @@ linters:
   disable-all: true
   enable:
     - bodyclose
-    - deadcode
     - depguard
     - dogsled
     - dupl
     - errcheck
-    #- funlen
     - gochecknoinits
-    #- gocognit
     - goconst
     - gocritic
     - gocyclo
     - gofmt
     - goimports
-    - golint
+    - revive
     - gosimple
     - govet
     - ineffassign
-    - interfacer
-    #- maligned
     - misspell
     - nakedret
     - prealloc
-    - scopelint
     - staticcheck
-    - structcheck
-    #- stylecheck
     - typecheck
     - unconvert
     - unparam
     - unused
-    - varcheck
     - whitespace

@@ -65,6 +65,8 @@ func run(args []string) error {
 		ShortUsage: "testman <subcommand> [flags]",
 		ShortHelp:  "Advanced testing workflows for Go projects.",
 		Exec: func(ctx context.Context, args []string) error {
+			_ = ctx
+			_ = args
 			return flag.ErrHelp
 		},
 		Subcommands: []*ffcli.Command{
@@ -108,6 +110,7 @@ const (
 )
 
 func runList(ctx context.Context, args []string) error {
+	_ = ctx
 	if len(args) == 0 {
 		return flag.ErrHelp
 	}
@@ -142,6 +145,7 @@ func runList(ctx context.Context, args []string) error {
 }
 
 func runTest(ctx context.Context, args []string) error {
+	_ = ctx
 	if len(args) == 0 {
 		return flag.ErrHelp
 	}
