@@ -105,7 +105,6 @@ const (
    testman list -skip ^TestStable ./...
 	 testman list -run stable -i ./...
 	 testman list -run ^TestStable ./...`
-
 )
 
 func runList(ctx context.Context, args []string) error {
@@ -308,7 +307,7 @@ func listDirTests(dir string) ([]string, error) {
 				if opts.RegexCaseInsensitive {
 					skip = "(?i)" + skip
 				}
-				
+
 				matched, err := regexp.MatchString(skip, test)
 				if err != nil {
 					return nil, err
@@ -384,13 +383,13 @@ type Package struct {
 }
 
 type Opts struct {
-	Verbose         bool
-	Skip            stringSliceFlag
-	Run             stringSliceFlag
-	Timeout         time.Duration
-	Retry           int
-	TmpDir          string
-	ContinueOnError bool
+	Verbose              bool
+	Skip                 stringSliceFlag
+	Run                  stringSliceFlag
+	Timeout              time.Duration
+	Retry                int
+	TmpDir               string
+	ContinueOnError      bool
 	RegexCaseInsensitive bool
 
 	// test.*
