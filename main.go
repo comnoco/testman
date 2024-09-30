@@ -136,7 +136,7 @@ func runList(ctx context.Context, args []string) error {
 			continue
 		}
 
-		log.Println(pkg.ImportPath)
+		fmt.Println(pkg.ImportPath)
 		for _, test := range tests {
 			fmt.Printf("  %s\n", test)
 		}
@@ -155,13 +155,13 @@ func runTest(ctx context.Context, args []string) error {
 	}
 	defer cleanup()
 
-	log.Printf("runTest opts=%s args=%s", JSON(opts), JSON(args))
+	fmt.Printf("runTest opts=%s args=%s", JSON(opts), JSON(args))
 	start := time.Now()
 
 	if opts.Timeout > 0 {
 		go func() {
 			<-time.After(opts.Timeout)
-			log.Printf("FAIL: timed out after %s\n", time.Since(start))
+			fmt.Printf("FAIL: timed out after %s\n", time.Since(start))
 			panic(fmt.Sprintf("timed out after %s", time.Since(start)))
 		}()
 	}
@@ -187,7 +187,7 @@ func runTest(ctx context.Context, args []string) error {
 		// compile test binary
 		bin, err := compileTestBin(pkg, opts.TmpDir)
 		if err != nil {
-			log.Printf("FAIL\t%s\t[compile error: %v]\n", pkg.ImportPath, err)
+			fmt.Printf("FAIL\t%s\t[compile error: %v]\n", pkg.ImportPath, err)
 			return err
 		}
 
@@ -209,31 +209,31 @@ func runTest(ctx context.Context, args []string) error {
 			args = append(args, "-test.run", fmt.Sprintf("^%s$", test))
 			for i := opts.Retry; i >= 0; i-- {
 				cmd := exec.Command(bin, args...)
-				log.Println(cmd.String())
+				fmt.Println(cmd.String())
 				out, err := cmd.CombinedOutput()
 				if err != nil {
 					if i == 0 {
-						log.Printf("FAIL\t%s.%s\t[test error: %v]\n", pkg.ImportPath, test, err)
+						fmt.Printf("FAIL\t%s.%s\t[test error: %v]\n", pkg.ImportPath, test, err)
 						isPackageOK = false
 						atLeastOneFailure = true
 					} else if opts.Verbose {
-						log.Printf("RETRY\t%s.%s\t[test error: %v]\n", pkg.ImportPath, test, err)
+						fmt.Printf("RETRY\t%s.%s\t[test error: %v]\n", pkg.ImportPath, test, err)
 					}
 					if opts.Verbose {
-						log.Println(string(out))
+						fmt.Println(string(out))
 					}
 				} else {
-					log.Printf("ok\t%s.%s\n", pkg.ImportPath, test)
+					fmt.Printf("ok\t%s.%s\n", pkg.ImportPath, test)
 					break
 				}
 			}
 		}
 		if isPackageOK {
-			log.Printf("ok\t%s\t%s\n", pkg.ImportPath, time.Since(pkgStart))
+			fmt.Printf("ok\t%s\t%s\n", pkg.ImportPath, time.Since(pkgStart))
 		}
 	}
 
-	log.Printf("total: %s\n", time.Since(start))
+	fmt.Printf("total: %s\n", time.Since(start))
 	if atLeastOneFailure {
 		return errors.New("at least one failure occurred")
 	}
@@ -271,7 +271,7 @@ func compileTestBin(pkg Package, tempdir string) (string, error) {
 	args = append(args, "-o", bin)
 	cmd := exec.Command("go", args...)
 	cmd.Dir = pkg.Dir
-	log.Println(cmd.String())
+	fmt.Println(cmd.String())
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, string(out))
@@ -284,7 +284,7 @@ func compileTestBin(pkg Package, tempdir string) (string, error) {
 func listDirTests(dir string) ([]string, error) {
 	cmd := exec.Command("go", "test", "-list", ".")
 	cmd.Dir = dir
-	log.Println(cmd.String())
+	fmt.Println(cmd.String())
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return nil, err
@@ -303,7 +303,7 @@ func listDirTests(dir string) ([]string, error) {
 	}
 
 	if len(opts.Skip) > 0 {
-		log.Println("skip", opts.Skip)
+		fmt.Println("skip", opts.Skip)
 		var filteredTests []string
 		for _, test := range tests {
 			shouldKeep := true
@@ -329,7 +329,7 @@ func listDirTests(dir string) ([]string, error) {
 	}
 
 	if len(opts.Run) > 0 {
-		log.Println("run", opts.Run)
+		fmt.Println("run", opts.Run)
 		var filteredTests []string
 		for _, test := range tests {
 			shouldKeep := false
@@ -360,7 +360,7 @@ func listDirTests(dir string) ([]string, error) {
 func listPackagesWithTests(patterns []string) ([]Package, error) {
 	cmdArgs := append([]string{"list", "-test", "-f", "{{.ImportPath}} {{.Dir}}"}, patterns...)
 	cmd := exec.Command("go", cmdArgs...)
-	log.Println(cmd.String())
+	fmt.Println(cmd.String())
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, string(out))
