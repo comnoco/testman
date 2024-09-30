@@ -73,7 +73,6 @@ jobs:
     strategy:
       matrix:
         golang:
-          #- 1.14.7
           - 1.23.1
     steps:
       - uses: actions/checkout@v4.2.0
@@ -130,8 +129,6 @@ jobs:
     strategy:
       matrix:
         golang:
-          - 1.14.7
-          - 1.15.2
           - 1.23.1
     env:
       OS: ubuntu-latest
@@ -171,7 +168,6 @@ jobs:
     strategy:
       matrix:
         golang:
-          - 1.15.2
           - 1.23.1
     env:
       OS: ubuntu-latest
