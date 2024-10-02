@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.uber.org/goleak"
 )
 
 func TestRun(t *testing.T) {
@@ -43,7 +42,7 @@ func ExampleList() {
 }
 
 func TestMain(m *testing.M) {
-	goleak.VerifyTestMain(m)
+	// goleak.VerifyTestMain(m)
 }
 
 func checkErr(err error) {

@@ -209,7 +209,7 @@ func runTest(ctx context.Context, args []string) error {
 			args = append(args, "-test.run", fmt.Sprintf("^%s$", test))
 			for i := opts.Retry; i >= 0; i-- {
 				cmd := exec.Command(bin, args...)
-				fmt.Println(cmd.String())
+				// fmt.Println(cmd.String())
 				out, err := cmd.CombinedOutput()
 				if err != nil {
 					if i == 0 {
@@ -284,7 +284,8 @@ func compileTestBin(pkg Package, tempdir string) (string, error) {
 func listDirTests(dir string) ([]string, error) {
 	cmd := exec.Command("go", "test", "-list", ".")
 	cmd.Dir = dir
-	fmt.Println(cmd.String())
+	fmt.Println("Directory: ", dir)
+	// fmt.Println(cmd.String())
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return nil, err
@@ -301,9 +302,14 @@ func listDirTests(dir string) ([]string, error) {
 
 		tests = append(tests, line)
 	}
+	fmt.Printf("Found %d tests\n", len(tests))
+
+	if opts.Skip == nil && opts.Run == nil {
+		return tests, nil
+	}
 
 	if len(opts.Skip) > 0 {
-		fmt.Println("skip", opts.Skip)
+		// fmt.Println("skip", opts.Skip)
 		var filteredTests []string
 		for _, test := range tests {
 			shouldKeep := true
@@ -329,7 +335,7 @@ func listDirTests(dir string) ([]string, error) {
 	}
 
 	if len(opts.Run) > 0 {
-		fmt.Println("run", opts.Run)
+		// fmt.Println("run", opts.Run)
 		var filteredTests []string
 		for _, test := range tests {
 			shouldKeep := false
@@ -353,6 +359,7 @@ func listDirTests(dir string) ([]string, error) {
 		}
 		tests = filteredTests
 	}
+	fmt.Println("Filtered tests: ", tests)
 
 	return tests, nil
 }
@@ -360,7 +367,7 @@ func listDirTests(dir string) ([]string, error) {
 func listPackagesWithTests(patterns []string) ([]Package, error) {
 	cmdArgs := append([]string{"list", "-test", "-f", "{{.ImportPath}} {{.Dir}}"}, patterns...)
 	cmd := exec.Command("go", cmdArgs...)
-	fmt.Println(cmd.String())
+	// fmt.Println(cmd.String())
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, string(out))
