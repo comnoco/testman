@@ -27,4 +27,4 @@
 //	|/  |       |  \    \ /                    /  ' \/ _ \/ // / / |
 //	||  |       |  |    | |                   /_/_/_/\___/\_,_/_/  |
 //	+--------------------------------------------------------------+
-package main // import "moul.io/testman"
+package main // import "github.com/comnoco/testman/v2"

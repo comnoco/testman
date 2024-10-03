@@ -1,10 +1,11 @@
 {
     "_comment": "this project is not a node.js one, package.json is just used to define some metadata",
-    "name": "@moul.io/testman",
-    "version": "0.0.1",
+    "name": "@github.com/comnoco/testman/v2",
+    "version": "2.0.4",
     "author": "Manfred Touron <oss@moul.io> (https://manfred.life)",
     "contributors": [
-        "Manfred Touron <oss@moul.io> (https://manfred.life)"
+        "Manfred Touron <oss@moul.io> (https://manfred.life)",
+        "Tom O'Connor <tom@comnoco.com> (https://comnoco.com)"
     ],
     "license": "(Apache-2.0 OR MIT)",
     "scripts": {
@@ -14,8 +15,8 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/moul/testman.git"
+        "url": "https://github.com/comnoco/testman.git"
     },
-    "bugs": "https://github.com/moul/testman/issues",
-    "homepage": "https://moul.io/testman"
+    "bugs": "https://github.com/comnoco/testman/issues",
+    "homepage": "https://github.com/comnoco/testman/"
 }
