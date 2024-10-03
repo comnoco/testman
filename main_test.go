@@ -22,7 +22,7 @@ func ExampleList_examples() {
 	err := run([]string{"testman", "list", "./..."})
 	checkErr(err)
 	// Output:
-	// moul.io/testman/examples/testpkg
+	// github.com/comnoco/testman/v2/examples/testpkg
 	//   TestStableAlwaysSucceed
 	//   TestUnstableMaySucceed
 	//   TestBrokenAlwaysFailing
@@ -35,7 +35,7 @@ func ExampleList() {
 		panic(err)
 	}
 	// Output:
-	// moul.io/testman
+	// github.com/comnoco/testman/v2
 	//   TestRun
 	//   ExampleList_examples
 	//   ExampleList

@@ -2,7 +2,7 @@
 
 😎 `go test` wrapper for advanced testing workflows in Go
 
-[![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white)](https://pkg.go.dev/moul.io/testman)
+[![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white)](https://pkg.go.dev/github.com/comnoco/testman/v2)
 [![License](https://img.shields.io/badge/license-Apache--2.0%20%2F%20MIT-%2397ca00.svg)](https://github.com/moul/testman/blob/master/COPYRIGHT)
 [![GitHub release](https://img.shields.io/github/release/moul/testman.svg)](https://github.com/moul/testman/releases)
 [![Docker Metrics](https://images.microbadger.com/badges/image/moul/testman.svg)](https://microbadger.com/images/moul/testman)
@@ -13,7 +13,7 @@
 [![PR](https://github.com/moul/testman/workflows/PR/badge.svg)](https://github.com/moul/testman/actions?query=workflow%3APR)
 [![GolangCI](https://golangci.com/badges/github.com/moul/testman.svg)](https://golangci.com/r/github.com/moul/testman)
 [![codecov](https://codecov.io/gh/moul/testman/branch/master/graph/badge.svg)](https://codecov.io/gh/moul/testman)
-[![Go Report Card](https://goreportcard.com/badge/moul.io/testman)](https://goreportcard.com/report/moul.io/testman)
+[![Go Report Card](https://goreportcard.com/badge/github.com/comnoco/testman/v2)](https://goreportcard.com/report/github.com/comnoco/testman/v2)
 [![CodeFactor](https://www.codefactor.io/repository/github/moul/testman/badge)](https://www.codefactor.io/repository/github/moul/testman)
 
 
@@ -79,12 +79,12 @@ FLAGS
 ### Using go
 
 ```console
-$ go get -u moul.io/testman
+$ go get -u github.com/comnoco/testman/v2
 ```
 
 ### Releases
 
-See https://github.com/moul/testman/releases
+See https://github.com/comnoco/testman/releases
 
 ## Contribute
 

@@ -7,7 +7,7 @@ ARG             VERSION
 FROM            golang:1.18.1-alpine as builder
 RUN             apk add --no-cache git gcc musl-dev make
 ENV             GO111MODULE=on
-WORKDIR         /go/src/moul.io/testman
+WORKDIR         /go/src/github.com/comnoco/testman/v2
 COPY            go.* ./
 RUN             go mod download
 COPY            . ./
@@ -18,7 +18,7 @@ FROM alpine:3.16.0
 LABEL           org.label-schema.build-date=$BUILD_DATE \
                 org.label-schema.name="testman" \
                 org.label-schema.description="" \
-                org.label-schema.url="https://moul.io/testman/" \
+                org.label-schema.url="https://github.com/comnoco/testman/v2/" \
                 org.label-schema.vcs-ref=$VCS_REF \
                 org.label-schema.vcs-url="https://github.com/moul/testman" \
                 org.label-schema.vendor="Manfred Touron" \

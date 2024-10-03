@@ -1,4 +1,4 @@
-GOPKG ?=	moul.io/testman
+GOPKG ?=	github.com/comnoco/testman/v2
 DOCKER_IMAGE ?=	moul/testman
 GOMOD_DIRS ?= .
 GOBINS ?=	.

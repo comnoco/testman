@@ -1,5 +1,5 @@
-ok	moul.io/testman/examples/testpkg.TestStableAlwaysSucceed
-ok	moul.io/testman/examples/testpkg.TestUnstableMaySucceed
-FAIL	moul.io/testman/examples/testpkg.TestBrokenAlwaysFailing	[test error: exit status 1]
-ok	moul.io/testman/examples/testpkg.ExampleAlwaysSucceed
+ok	github.com/comnoco/testman/v2/examples/testpkg.TestStableAlwaysSucceed
+ok	github.com/comnoco/testman/v2/examples/testpkg.TestUnstableMaySucceed
+FAIL	github.com/comnoco/testman/v2/examples/testpkg.TestBrokenAlwaysFailing	[test error: exit status 1]
+ok	github.com/comnoco/testman/v2/examples/testpkg.ExampleAlwaysSucceed
 EXIT CODE: 1

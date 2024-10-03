@@ -1,4 +1,4 @@
-module moul.io/testman/examples
+module github.com/comnoco/testman/v2/examples
 
 go 1.15
 

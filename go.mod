@@ -1,4 +1,4 @@
-module moul.io/testman
+module github.com/comnoco/testman/v2
 
 go 1.13
 
